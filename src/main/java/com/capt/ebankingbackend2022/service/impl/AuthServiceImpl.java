@@ -11,6 +11,8 @@ import com.capt.ebankingbackend2022.repository.RoleRepository;
 import com.capt.ebankingbackend2022.security.JwtTokenProvider;
 import com.capt.ebankingbackend2022.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,18 +46,21 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
 
 
     @Override
-    public Response<String> login(AccountLoginDto accountLoginDto) {
+    public ResponseEntity<Response<String>> login(AccountLoginDto accountLoginDto) {
+        Response<String> response;
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(accountLoginDto.getPhoneNumber(), accountLoginDto.getPassword()));
             String token = jwtTokenProvider.createToken(accountLoginDto.getPhoneNumber(), accountRepository.findByPhoneNumber(accountLoginDto.getPhoneNumber()).getRoles());
-            return new Response<>(0, "login success", token);
+            response = new Response<>(0, "login success", token);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            return new Response<>(1, "phone number or password not true");
+            response = new Response<>(1, "phone number or password not true");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
     }
 
     @Override
-    public Response<AccountDto> saveUser(AccountDto userDto) {
+    public ResponseEntity<Response<AccountDto>> createAccount(AccountDto userDto) {
         userDto.setCreatedAt(new Date());
         AccountEntity userEntity = modelMapper.map(userDto, AccountEntity.class);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
@@ -65,10 +70,10 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
         if (code != null) {
             codeEntity = codeRepository.findByCode(code);
             if (codeEntity == null) {
-                return new Response<>(1, "Admin code not existed");
+                return new ResponseEntity<>(new Response<>(1, "Admin code not existed"), HttpStatus.FORBIDDEN);
             }
             if (!codeEntity.isActive()) {
-                return new Response<>(1, "Admin code is inactive");
+                return new ResponseEntity<>(new Response<>(1, "Admin code is inactive"), HttpStatus.FORBIDDEN);
             }
             roleString = "admin";
         }
@@ -81,12 +86,18 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
         }
         userEntity.setRoles(Collections.singletonList(role));
         if (accountRepository.existsByPhoneNumber(userDto.getPhoneNumber()))
-            return new Response<>(1, "phone number has been used");
+            return new ResponseEntity<>(new Response<>(1, "phone number has been used"), HttpStatus.FORBIDDEN);
         if (roleString.equals("admin")) {
             codeEntity.setActive(false);
+            codeEntity.setUpdatedAt(new Date());
             codeRepository.save(codeEntity);
         }
-        return new Response<>(0, "create account success", modelMapper.map(accountRepository.save(userEntity), AccountDto.class));
+        AccountDto accountDto = modelMapper.map(accountRepository.save(userEntity), AccountDto.class);
+        accountDto.setPassword(null);
+        return new ResponseEntity<>(
+                new Response<>(0, "create account success", accountDto),
+                HttpStatus.CREATED
+        );
     }
 
 

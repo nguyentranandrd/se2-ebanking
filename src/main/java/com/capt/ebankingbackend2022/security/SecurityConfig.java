@@ -40,7 +40,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Entry points
         http.authorizeRequests()//
-                .antMatchers("/auth/**").permitAll()//
+                .antMatchers("/auth/*").permitAll()//
+                .antMatchers("/auth/create-customer-account").hasRole("admin")
                 .antMatchers("/h2-console/**/**").permitAll()
                 // Disallow everything else..
                 .anyRequest().authenticated();

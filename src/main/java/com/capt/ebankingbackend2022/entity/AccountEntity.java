@@ -4,6 +4,8 @@ package com.capt.ebankingbackend2022.entity;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -24,8 +26,9 @@ public class AccountEntity extends BaseEntity {
     @OneToOne(mappedBy = "account")
     private UserEntity user;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     @JoinTable(name = "account_role", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Fetch(FetchMode.JOIN)
     private List<RoleEntity> roles;
 
 

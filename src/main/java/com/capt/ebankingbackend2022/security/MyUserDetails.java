@@ -11,10 +11,10 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +31,6 @@ public class MyUserDetails implements UserDetailsService {
         if (account == null) {
             throw new UsernameNotFoundException("User '" + phoneNumber + "' not found");
         }
-        System.out.println(account.getPassword());
         return User//
                 .withUsername(phoneNumber)//
                 .password(account.getPassword())//
@@ -45,7 +44,6 @@ public class MyUserDetails implements UserDetailsService {
 
     private Collection<? extends GrantedAuthority> mapRoleToAuthorities(Collection<RoleEntity> roles) {
         return roles.stream().map(roleEntity -> new SimpleGrantedAuthority(roleEntity.getName())).collect(Collectors.toList());
-
     }
 
 }
