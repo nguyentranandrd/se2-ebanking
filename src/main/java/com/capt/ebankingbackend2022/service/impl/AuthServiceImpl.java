@@ -1,8 +1,6 @@
 package com.capt.ebankingbackend2022.service.impl;
 
-import com.capt.ebankingbackend2022.dto.AccountDto;
-import com.capt.ebankingbackend2022.dto.AccountLoginDto;
-import com.capt.ebankingbackend2022.dto.Response;
+import com.capt.ebankingbackend2022.dto.*;
 import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.CodeEntity;
 import com.capt.ebankingbackend2022.entity.RoleEntity;
@@ -18,9 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 @Service
 public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
@@ -60,7 +56,7 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<Response<AccountDto>> createAccount(AccountDto userDto) {
+    public ResponseEntity<Response<AccountInfoDto>> createAccount(AccountDto userDto) {
         userDto.setCreatedAt(new Date());
         AccountEntity userEntity = modelMapper.map(userDto, AccountEntity.class);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
@@ -92,8 +88,14 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
             codeEntity.setUpdatedAt(new Date());
             codeRepository.save(codeEntity);
         }
-        AccountDto accountDto = modelMapper.map(accountRepository.save(userEntity), AccountDto.class);
-        accountDto.setPassword(null);
+        AccountEntity savedAccount = accountRepository.save(userEntity);
+        AccountInfoDto accountDto = modelMapper.map(savedAccount, AccountInfoDto.class);
+        List<RoleDto> roleDtos = new ArrayList<>();
+        for (RoleEntity  r:
+             savedAccount.getRoles()) {
+            roleDtos.add(modelMapper.map(r, RoleDto.class));
+        }
+        accountDto.setRoles(roleDtos);
         return new ResponseEntity<>(
                 new Response<>(0, "create account success", accountDto),
                 HttpStatus.CREATED

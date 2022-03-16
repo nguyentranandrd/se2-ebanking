@@ -30,13 +30,5 @@ public class AccountEntity extends BaseEntity {
     @JoinTable(name = "account_role", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
-    @Override
-    public String toString() {
-        return "AccountEntity{" +
-                "phoneNumber='" + phoneNumber + '\'' +
-                ", password='" + password + '\'' +
-                ", user=" + user +
-                ", roles=" + roles +
-                '}';
-    }
+
 }

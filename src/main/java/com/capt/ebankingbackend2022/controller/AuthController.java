@@ -1,6 +1,7 @@
 package com.capt.ebankingbackend2022.controller;
 
 import com.capt.ebankingbackend2022.dto.AccountDto;
+import com.capt.ebankingbackend2022.dto.AccountInfoDto;
 import com.capt.ebankingbackend2022.dto.AccountLoginDto;
 import com.capt.ebankingbackend2022.dto.Response;
 import com.capt.ebankingbackend2022.service.AuthService;
@@ -28,7 +29,7 @@ public class AuthController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<Response<AccountDto>> createAdminAccount(@RequestBody AccountDto userDto) {
+    public ResponseEntity<Response<AccountInfoDto>> createAdminAccount(@RequestBody AccountDto userDto) {
         if (userDto.getCode() == null) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Don't have permission"), HttpStatus.UNAUTHORIZED);
         }
@@ -37,7 +38,7 @@ public class AuthController {
 
 
     @PostMapping("/create-customer-account")
-    public ResponseEntity<Response<AccountDto>> createCustomerAccount(@RequestBody AccountDto userDto) {
+    public ResponseEntity<Response<AccountInfoDto>> createCustomerAccount(@RequestBody AccountDto userDto) {
         return authService.createAccount(userDto);
     }
 

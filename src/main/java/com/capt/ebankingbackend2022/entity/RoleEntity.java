@@ -18,8 +18,7 @@ public class RoleEntity extends BaseEntity {
     @Column(name = "name", unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToMany(mappedBy = "roles")
     private List<AccountEntity> accounts;
 
     @Override

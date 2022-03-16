@@ -16,9 +16,6 @@ public class AccountDto extends BaseDto {
 
     private String password;
 
-    private UserEntity user;
-
     private String code;
 
-    private List<RoleEntity> roles;
 }

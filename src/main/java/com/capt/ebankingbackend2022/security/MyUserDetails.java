@@ -22,11 +22,9 @@ public class MyUserDetails implements UserDetailsService {
     @Autowired
     private AccountRepository userRepository;
 
-
     @Override
     public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
         final AccountEntity account = userRepository.findByPhoneNumber(phoneNumber);
-
         if (account == null) {
             throw new UsernameNotFoundException("User '" + phoneNumber + "' not found");
         }
@@ -42,7 +40,12 @@ public class MyUserDetails implements UserDetailsService {
     }
 
     private Collection<? extends GrantedAuthority> mapRoleToAuthorities(Collection<RoleEntity> roles) {
-        return roles.stream().map(roleEntity -> new SimpleGrantedAuthority(roleEntity.getName())).collect(Collectors.toList());
+        return roles.stream().map(
+                roleEntity ->
+                        new SimpleGrantedAuthority(
+                                roleEntity.getName()
+                        )
+        ).collect(Collectors.toList());
     }
 
 }
