@@ -1,5 +1,6 @@
 package com.capt.ebankingbackend2022.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,10 +18,15 @@ public class RoleEntity extends BaseEntity {
     @Column(name = "name", unique = true)
     private String name;
 
-
-    @ManyToMany(mappedBy = "roles")
-    @Fetch(FetchMode.SELECT)
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<AccountEntity> accounts;
 
-
+    @Override
+    public String toString() {
+        return "RoleEntity{" +
+                "name='" + name + '\'' +
+                ", accounts=" + accounts +
+                '}';
+    }
 }

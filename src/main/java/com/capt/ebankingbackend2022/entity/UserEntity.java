@@ -29,6 +29,9 @@ public class UserEntity extends BaseEntity {
     @Column(name = "citizen_id", nullable = false, unique = true)
     private String citizenIdentification;
 
+    @Column(name = "avatar", length = 1024)
+    private String avatar;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private AccountEntity account;

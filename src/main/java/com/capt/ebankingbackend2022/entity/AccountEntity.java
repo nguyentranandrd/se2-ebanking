@@ -26,10 +26,17 @@ public class AccountEntity extends BaseEntity {
     @OneToOne(mappedBy = "account")
     private UserEntity user;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "account_role", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    @Fetch(FetchMode.JOIN)
     private List<RoleEntity> roles;
 
-
+    @Override
+    public String toString() {
+        return "AccountEntity{" +
+                "phoneNumber='" + phoneNumber + '\'' +
+                ", password='" + password + '\'' +
+                ", user=" + user +
+                ", roles=" + roles +
+                '}';
+    }
 }

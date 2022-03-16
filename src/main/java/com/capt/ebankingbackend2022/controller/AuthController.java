@@ -36,7 +36,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/create-customer-account") // vẫn k vào đây,
+    @PostMapping("/create-customer-account")
     public ResponseEntity<Response<AccountDto>> createCustomerAccount(@RequestBody AccountDto userDto) {
         return authService.createAccount(userDto);
     }
