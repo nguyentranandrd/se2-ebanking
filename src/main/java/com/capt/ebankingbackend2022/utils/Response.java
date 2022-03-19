@@ -1,4 +1,4 @@
-package com.capt.ebankingbackend2022.dto;
+package com.capt.ebankingbackend2022.utils;
 
 public class Response<T> {
     public static final int STATUS_SUCCESS = 0;

@@ -1,6 +1,5 @@
 package com.capt.ebankingbackend2022.entity;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,9 +16,6 @@ public class UserEntity extends BaseEntity {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "phone_no", nullable = false, unique = true)
-    private String phoneNumber;
-
     @Column(name = "email", nullable = false)
     private String email;
 
@@ -35,6 +31,5 @@ public class UserEntity extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private AccountEntity account;
-
 
 }

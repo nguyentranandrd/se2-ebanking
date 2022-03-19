@@ -5,9 +5,12 @@ import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.CodeEntity;
 import com.capt.ebankingbackend2022.entity.RoleEntity;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
+import com.capt.ebankingbackend2022.repository.CodeRepository;
 import com.capt.ebankingbackend2022.repository.RoleRepository;
 import com.capt.ebankingbackend2022.security.JwtTokenProvider;
 import com.capt.ebankingbackend2022.service.AuthService;
+import com.capt.ebankingbackend2022.utils.Authority;
+import com.capt.ebankingbackend2022.utils.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,11 +45,11 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
 
 
     @Override
-    public ResponseEntity<Response<String>> login(AccountLoginDto accountLoginDto) {
+    public ResponseEntity<Response<String>> login(LoginRequestDto loginRequestDto) {
         Response<String> response;
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(accountLoginDto.getPhoneNumber(), accountLoginDto.getPassword()));
-            String token = jwtTokenProvider.createToken(accountLoginDto.getPhoneNumber(), accountRepository.findByPhoneNumber(accountLoginDto.getPhoneNumber()).getRoles());
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.getPhoneNumber(), loginRequestDto.getPassword()));
+            String token = jwtTokenProvider.createToken(loginRequestDto.getPhoneNumber(), accountRepository.findByPhoneNumber(loginRequestDto.getPhoneNumber()).getRoles());
             response = new Response<>(0, "login success", token);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -56,22 +59,22 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<Response<AccountInfoDto>> createAccount(AccountDto userDto) {
+    public ResponseEntity<Response<AccountDto>> createAccount(RegisterAccountDto userDto) {
         userDto.setCreatedAt(new Date());
         AccountEntity userEntity = modelMapper.map(userDto, AccountEntity.class);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         String code = userDto.getCode();
-        String roleString = "user";
+        String roleString = Authority.USER;
         CodeEntity codeEntity = null;
         if (code != null) {
             codeEntity = codeRepository.findByCode(code);
             if (codeEntity == null) {
-                return new ResponseEntity<>(new Response<>(1, "Admin code not existed"), HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>(new Response<>(1, "Admin code not existed"), HttpStatus.BAD_REQUEST);
             }
             if (!codeEntity.isActive()) {
-                return new ResponseEntity<>(new Response<>(1, "Admin code is inactive"), HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>(new Response<>(1, "Admin code is inactive"), HttpStatus.BAD_REQUEST);
             }
-            roleString = "admin";
+            roleString = Authority.ADMIN;
         }
         RoleEntity role = roleRepository.findByName(roleString);
         if (role == null) {
@@ -82,14 +85,14 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
         }
         userEntity.setRoles(Collections.singletonList(role));
         if (accountRepository.existsByPhoneNumber(userDto.getPhoneNumber()))
-            return new ResponseEntity<>(new Response<>(1, "phone number has been used"), HttpStatus.FORBIDDEN);
-        if (roleString.equals("admin")) {
+            return new ResponseEntity<>(new Response<>(1, "phone number has been used"), HttpStatus.BAD_REQUEST);
+        if (roleString.equals(Authority.ADMIN)) {
             codeEntity.setActive(false);
             codeEntity.setUpdatedAt(new Date());
             codeRepository.save(codeEntity);
         }
         AccountEntity savedAccount = accountRepository.save(userEntity);
-        AccountInfoDto accountDto = modelMapper.map(savedAccount, AccountInfoDto.class);
+        AccountDto accountDto = modelMapper.map(savedAccount, AccountDto.class);
         List<RoleDto> roleDtos = new ArrayList<>();
         for (RoleEntity  r:
              savedAccount.getRoles()) {

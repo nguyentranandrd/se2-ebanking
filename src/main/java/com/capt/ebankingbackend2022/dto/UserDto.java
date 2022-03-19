@@ -1,13 +1,11 @@
 package com.capt.ebankingbackend2022.dto;
 
-import com.capt.ebankingbackend2022.entity.AccountEntity;
-import com.capt.ebankingbackend2022.entity.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Getter
 @Setter
@@ -16,7 +14,7 @@ public class UserDto extends BaseDto {
 
     private String lastName;
 
-    private String phoneNumber;
+    private String avatar;
 
     private String email;
 
@@ -24,5 +22,6 @@ public class UserDto extends BaseDto {
 
     private String citizenIdentification;
 
-    private AccountEntity account;
+    private AccountDto account;
+
 }

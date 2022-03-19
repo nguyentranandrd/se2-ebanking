@@ -23,12 +23,20 @@ public class AccountEntity extends BaseEntity {
     @Column(name = "password")
     private String password;
 
-    @OneToOne(mappedBy = "account")
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private UserEntity user;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "account_role", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
 
+    @Override
+    public String toString() {
+        return "AccountEntity{" +
+                "phoneNumber='" + phoneNumber + '\'' +
+                ", password='" + password + '\'' +
+                ", user=" + user +
+                '}';
+    }
 }

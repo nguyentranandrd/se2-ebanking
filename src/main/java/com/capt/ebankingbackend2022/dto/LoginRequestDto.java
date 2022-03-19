@@ -1,14 +1,14 @@
 package com.capt.ebankingbackend2022.dto;
 
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
+@Data
 @Getter
 @Setter
-public class AccountInfoDto extends BaseDto {
+public class LoginRequestDto{
     private String phoneNumber;
-
-    private List<RoleDto> roles;
+    private String password;
 }

@@ -1,6 +1,6 @@
 package com.capt.ebankingbackend2022.configuration;
 
-import org.modelmapper.ModelMapper;
+import com.capt.ebankingbackend2022.utils.MMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 public class ModelMapperConfiguration {
 
     @Bean
-    public ModelMapper provideModelMapper() {
-        return new ModelMapper();
+    public MMapper provideModelMapper() {
+        return new MMapper();
     }
 
 }

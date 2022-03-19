@@ -1,6 +1,11 @@
 package com.capt.ebankingbackend2022.security;
 
 import com.capt.ebankingbackend2022.exception.CustomException;
+import com.capt.ebankingbackend2022.utils.Response;
+import com.capt.ebankingbackend2022.utils.ResponseUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -31,11 +36,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         } catch (CustomException ex) {
             //this is very important, since it guarantees the user is not authenticated at all
             SecurityContextHolder.clearContext();
-            httpServletResponse.sendError(ex.getHttpStatus().value(), ex.getMessage());
+            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            ResponseUtil.fire(httpServletResponse, new Response<>(Response.STATUS_FAILED, "Expired or invalid JWT token"));
             return;
         }
-
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
+
+
 
 }
