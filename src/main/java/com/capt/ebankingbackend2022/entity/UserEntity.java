@@ -29,7 +29,7 @@ public class UserEntity extends BaseEntity {
     private String avatar;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "account_id", referencedColumnName = "id")
-    private AccountEntity account;
+    @JoinColumn(name = "login_id", referencedColumnName = "id")
+    private LoginAccountEntity loginAccount;
 
 }

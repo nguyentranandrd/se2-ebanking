@@ -1,21 +1,17 @@
 package com.capt.ebankingbackend2022.entity;
 
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "FR_ACCOUNT")
-public class AccountEntity extends BaseEntity {
+@Table(name = "FR_LOGIN")
+public class LoginAccountEntity extends BaseEntity {
 
     @Column(name = "phone_no", unique = true)
     private String phoneNumber;
@@ -23,11 +19,11 @@ public class AccountEntity extends BaseEntity {
     @Column(name = "password")
     private String password;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "loginAccount", cascade = CascadeType.ALL)
     private UserEntity user;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "account_role", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "login_role", joinColumns = @JoinColumn(name = "login_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
 

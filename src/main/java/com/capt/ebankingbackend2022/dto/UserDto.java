@@ -22,6 +22,6 @@ public class UserDto extends BaseDto {
 
     private String citizenIdentification;
 
-    private AccountDto account;
+    private LoginAccountDto loginAccount;
 
 }

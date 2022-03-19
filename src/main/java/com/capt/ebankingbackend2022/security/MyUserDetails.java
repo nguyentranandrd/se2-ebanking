@@ -1,7 +1,7 @@
 package com.capt.ebankingbackend2022.security;
 
 
-import com.capt.ebankingbackend2022.entity.AccountEntity;
+import com.capt.ebankingbackend2022.entity.LoginAccountEntity;
 import com.capt.ebankingbackend2022.entity.RoleEntity;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class MyUserDetails implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
-        final AccountEntity account = userRepository.findByPhoneNumber(phoneNumber);
+        final LoginAccountEntity account = userRepository.findByPhoneNumber(phoneNumber);
         if (account == null) {
             throw new UsernameNotFoundException("User '" + phoneNumber + "' not found");
         }

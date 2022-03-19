@@ -1,11 +1,7 @@
 package com.capt.ebankingbackend2022.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -19,13 +15,13 @@ public class RoleEntity extends BaseEntity {
     private String name;
 
     @ManyToMany(mappedBy = "roles", cascade=CascadeType.ALL)
-    private List<AccountEntity> accounts;
+    private List<LoginAccountEntity> loginAccounts;
 
     @Override
     public String toString() {
         return "RoleEntity{" +
                 "name='" + name + '\'' +
-                ", accounts=" + accounts +
+                ", accounts=" + loginAccounts +
                 '}';
     }
 }

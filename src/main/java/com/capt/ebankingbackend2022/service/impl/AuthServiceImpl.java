@@ -1,7 +1,7 @@
 package com.capt.ebankingbackend2022.service.impl;
 
 import com.capt.ebankingbackend2022.dto.*;
-import com.capt.ebankingbackend2022.entity.AccountEntity;
+import com.capt.ebankingbackend2022.entity.LoginAccountEntity;
 import com.capt.ebankingbackend2022.entity.CodeEntity;
 import com.capt.ebankingbackend2022.entity.RoleEntity;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
@@ -10,6 +10,7 @@ import com.capt.ebankingbackend2022.repository.RoleRepository;
 import com.capt.ebankingbackend2022.security.JwtTokenProvider;
 import com.capt.ebankingbackend2022.service.AuthService;
 import com.capt.ebankingbackend2022.utils.Authority;
+import com.capt.ebankingbackend2022.utils.RegexValidationUtil;
 import com.capt.ebankingbackend2022.utils.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -59,9 +60,9 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<Response<AccountDto>> createAccount(RegisterAccountDto userDto) {
+    public ResponseEntity<Response<LoginAccountDto>> createLoginAccount(RegisterAccountDto userDto) {
         userDto.setCreatedAt(new Date());
-        AccountEntity userEntity = modelMapper.map(userDto, AccountEntity.class);
+        LoginAccountEntity userEntity = modelMapper.map(userDto, LoginAccountEntity.class);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         String code = userDto.getCode();
         String roleString = Authority.USER;
@@ -85,22 +86,25 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
         }
         userEntity.setRoles(Collections.singletonList(role));
         if (accountRepository.existsByPhoneNumber(userDto.getPhoneNumber()))
-            return new ResponseEntity<>(new Response<>(1, "phone number has been used"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "phone number has been used"), HttpStatus.BAD_REQUEST);
+        if (RegexValidationUtil.is10NumberPhone(userDto.getPhoneNumber())) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Invalid phone number (ex: 0123456789 or +840123456789)"), HttpStatus.BAD_REQUEST);
+        }
         if (roleString.equals(Authority.ADMIN)) {
             codeEntity.setActive(false);
             codeEntity.setUpdatedAt(new Date());
             codeRepository.save(codeEntity);
         }
-        AccountEntity savedAccount = accountRepository.save(userEntity);
-        AccountDto accountDto = modelMapper.map(savedAccount, AccountDto.class);
+        LoginAccountEntity savedAccount = accountRepository.save(userEntity);
+        LoginAccountDto loginAccountDto = modelMapper.map(savedAccount, LoginAccountDto.class);
         List<RoleDto> roleDtos = new ArrayList<>();
-        for (RoleEntity  r:
-             savedAccount.getRoles()) {
+        for (RoleEntity r :
+                savedAccount.getRoles()) {
             roleDtos.add(modelMapper.map(r, RoleDto.class));
         }
-        accountDto.setRoles(roleDtos);
+        loginAccountDto.setRoles(roleDtos);
         return new ResponseEntity<>(
-                new Response<>(0, "create account success", accountDto),
+                new Response<>(0, "create account success", loginAccountDto),
                 HttpStatus.CREATED
         );
     }
