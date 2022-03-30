@@ -10,8 +10,8 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "FR_LOGIN")
-public class LoginAccountEntity extends BaseEntity {
+@Table(name = "FR_ACCOUNT")
+public class AccountEntity extends BaseEntity {
 
     @Column(name = "phone_no", unique = true)
     private String phoneNumber;
@@ -19,11 +19,14 @@ public class LoginAccountEntity extends BaseEntity {
     @Column(name = "password")
     private String password;
 
-    @OneToOne(mappedBy = "loginAccount", cascade = CascadeType.ALL)
+    @Column(name = "balance")
+    private double balance;
+
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private UserEntity user;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "login_role", joinColumns = @JoinColumn(name = "login_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "account_role", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
 

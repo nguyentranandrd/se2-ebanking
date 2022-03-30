@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Getter
 @Setter
-public class LoginAccountDto extends BaseDto {
+public class AccountDto extends BaseDto {
     private String phoneNumber;
 
     private List<RoleDto> roles;

@@ -5,6 +5,8 @@ import com.capt.ebankingbackend2022.service.UserService;
 import com.capt.ebankingbackend2022.utils.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -32,10 +34,25 @@ public class UserController {
         return userService.updateUserInfo(accountId, userDto);
     }
 
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<Response<UserDto>> getUserByAccountId(@PathVariable Long id) {
+        return userService.getUserByAccountId(id);
+    }
+
+
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getLoggedUserInfo() {
+    public ResponseEntity<Response<UserDto>> getLoggedUserInfo() {
         return userService.getLoggedUserInfo();
+    }
+
+
+    @GetMapping("")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<Response<Page<UserDto>>> getUsers(Pageable pageable) {
+        return userService.getPageableUsers(pageable);
     }
 
 }

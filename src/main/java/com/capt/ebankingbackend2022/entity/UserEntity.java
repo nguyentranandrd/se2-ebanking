@@ -4,12 +4,24 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "FR_USER")
-public class UserEntity extends BaseEntity {
+public class UserEntity {
+    @Id
+    @Column(name = "id")
+    protected Long id;
+
+    @Column(name = "create_at", nullable = false, updatable = false)
+    protected Date createdAt;
+
+    @Column(name = "update_at")
+    protected Date updatedAt;
+
+
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
@@ -29,7 +41,7 @@ public class UserEntity extends BaseEntity {
     private String avatar;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "login_id", referencedColumnName = "id")
-    private LoginAccountEntity loginAccount;
+    @JoinColumn(name = "account_id", referencedColumnName = "id")
+    private AccountEntity account;
 
 }

@@ -1,8 +1,8 @@
 package com.capt.ebankingbackend2022.service.impl;
 
-import com.capt.ebankingbackend2022.dto.LoginAccountDto;
+import com.capt.ebankingbackend2022.dto.AccountDto;
 import com.capt.ebankingbackend2022.dto.UserDto;
-import com.capt.ebankingbackend2022.entity.LoginAccountEntity;
+import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.UserEntity;
 import com.capt.ebankingbackend2022.mapper.UserMapper;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
@@ -11,6 +11,9 @@ import com.capt.ebankingbackend2022.service.UserService;
 import com.capt.ebankingbackend2022.utils.RegexValidationUtil;
 import com.capt.ebankingbackend2022.utils.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,7 +36,7 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<Response<UserDto>> updateUserInfo(Long accountId, UserDto userDto) {
-        LoginAccountEntity account = accountRepository.findById(accountId).orElse(null);
+        AccountEntity account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Account not found"), HttpStatus.BAD_REQUEST);
         }
@@ -48,7 +51,7 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
         return updateUser(account, userDto);
     }
 
-    private ResponseEntity<Response<UserDto>> updateUser(LoginAccountEntity account, UserDto userDto) {
+    private ResponseEntity<Response<UserDto>> updateUser(AccountEntity account, UserDto userDto) {
         if (userRepository.existsByEmail(userDto.getEmail()) && !account.getUser().getEmail().equals(userDto.getEmail())) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Email is existed"), HttpStatus.BAD_REQUEST);
         }
@@ -63,7 +66,7 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Update user info successfully", userDto), HttpStatus.OK);
     }
 
-    private ResponseEntity<Response<UserDto>> createUser(LoginAccountEntity account, UserDto userDto) {
+    private ResponseEntity<Response<UserDto>> createUser(AccountEntity account, UserDto userDto) {
         if (userRepository.existsByCitizenIdentification(userDto.getCitizenIdentification())) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Citizen identification is existed"), HttpStatus.BAD_REQUEST);
         }
@@ -72,26 +75,52 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
         }
         userDto.setCreatedAt(new Date());
         UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
-        userEntity.setLoginAccount(account);
+        userEntity.setId(account.getId());
+        userEntity.setAccount(account);
         userEntity = userRepository.save(userEntity);
-        LoginAccountDto loginAccountDto = modelMapper.map(account, LoginAccountDto.class);
+        AccountDto accountDto = modelMapper.map(account, AccountDto.class);
         UserDto userBodyResponseDto = modelMapper.map(userEntity, UserDto.class);
-        userBodyResponseDto.setLoginAccount(loginAccountDto);
+        userBodyResponseDto.setAccount(accountDto);
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Save user info successfully", userBodyResponseDto), HttpStatus.OK);
-
     }
 
     @Override
-    public ResponseEntity<UserDto> getLoggedUserInfo() {
+    public ResponseEntity<Response<UserDto>> getLoggedUserInfo() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        LoginAccountEntity account = accountRepository.findByPhoneNumber(userDetails.getUsername());
+        AccountEntity account = accountRepository.findByPhoneNumber(userDetails.getUsername());
+        UserDto userDto = getUserByAccount(account);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, userDto), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Response<UserDto>> getUserByAccountId(Long id) {
+        AccountEntity account = accountRepository.findById(id).orElse(null);
+        if (account == null)
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, ""), HttpStatus.BAD_REQUEST);
+        UserDto userDto = getUserByAccount(account);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, userDto), HttpStatus.OK);
+    }
+
+
+    private UserDto getUserByAccount(AccountEntity account) {
         UserEntity userEntity = account.getUser();
         if (userEntity == null) {
             userEntity = new UserEntity();
-            userEntity.setLoginAccount(account);
+            userEntity.setAccount(account);
         }
-        UserDto userDto = userMapper.toDto(userEntity);
-        return new ResponseEntity<>(userDto, HttpStatus.OK);
+        return userMapper.toDto(userEntity);
+    }
+
+    @Override
+    public ResponseEntity<Response<Page<UserDto>>> getPageableUsers(Pageable pageable) {
+        Page<AccountEntity> accountEntityPage;
+        try {
+            accountEntityPage = accountRepository.findAll(pageable);
+        } catch (PropertyReferenceException exception) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "sort param not found"), HttpStatus.BAD_REQUEST);
+        }
+        Page<UserDto> userDtoPage = accountEntityPage.map(this::getUserByAccount);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", userDtoPage), HttpStatus.OK);
     }
 }

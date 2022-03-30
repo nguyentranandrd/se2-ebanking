@@ -1,7 +1,7 @@
 package com.capt.ebankingbackend2022.service.impl;
 
 import com.capt.ebankingbackend2022.dto.*;
-import com.capt.ebankingbackend2022.entity.LoginAccountEntity;
+import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.CodeEntity;
 import com.capt.ebankingbackend2022.entity.RoleEntity;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
@@ -60,9 +60,9 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<Response<LoginAccountDto>> createLoginAccount(RegisterAccountDto userDto) {
+    public ResponseEntity<Response<AccountDto>> createLoginAccount(RegisterAccountDto userDto) {
         userDto.setCreatedAt(new Date());
-        LoginAccountEntity userEntity = modelMapper.map(userDto, LoginAccountEntity.class);
+        AccountEntity userEntity = modelMapper.map(userDto, AccountEntity.class);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         String code = userDto.getCode();
         String roleString = Authority.USER;
@@ -95,16 +95,16 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
             codeEntity.setUpdatedAt(new Date());
             codeRepository.save(codeEntity);
         }
-        LoginAccountEntity savedAccount = accountRepository.save(userEntity);
-        LoginAccountDto loginAccountDto = modelMapper.map(savedAccount, LoginAccountDto.class);
+        AccountEntity savedAccount = accountRepository.save(userEntity);
+        AccountDto accountDto = modelMapper.map(savedAccount, AccountDto.class);
         List<RoleDto> roleDtos = new ArrayList<>();
         for (RoleEntity r :
                 savedAccount.getRoles()) {
             roleDtos.add(modelMapper.map(r, RoleDto.class));
         }
-        loginAccountDto.setRoles(roleDtos);
+        accountDto.setRoles(roleDtos);
         return new ResponseEntity<>(
-                new Response<>(0, "create account success", loginAccountDto),
+                new Response<>(0, "create account success", accountDto),
                 HttpStatus.CREATED
         );
     }

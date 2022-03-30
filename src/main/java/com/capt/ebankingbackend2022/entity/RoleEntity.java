@@ -15,13 +15,13 @@ public class RoleEntity extends BaseEntity {
     private String name;
 
     @ManyToMany(mappedBy = "roles", cascade=CascadeType.ALL)
-    private List<LoginAccountEntity> loginAccounts;
+    private List<AccountEntity> accounts;
 
     @Override
     public String toString() {
         return "RoleEntity{" +
                 "name='" + name + '\'' +
-                ", accounts=" + loginAccounts +
+                ", accounts=" + accounts +
                 '}';
     }
 }
