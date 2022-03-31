@@ -4,35 +4,38 @@ import com.capt.ebankingbackend2022.dto.AccountDto;
 import com.capt.ebankingbackend2022.dto.RoleDto;
 import com.capt.ebankingbackend2022.dto.UserDto;
 import com.capt.ebankingbackend2022.entity.AccountEntity;
+import com.capt.ebankingbackend2022.entity.RoleEntity;
 import com.capt.ebankingbackend2022.entity.UserEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
-public class UserMapper extends BaseMapper<UserEntity, UserDto> {
+public class AccountMapper extends BaseMapper<AccountEntity, AccountDto> {
     @Autowired
-    public UserMapper(ModelMapper mapper) {
+    public AccountMapper(ModelMapper mapper) {
         super(mapper);
     }
 
     @Override
-    public UserEntity toEntity(UserDto userDto) {
-        UserEntity userEntity = mapper.map(userDto, UserEntity.class);
-        return userEntity;
+    public AccountEntity toEntity(AccountDto accountDto) {
+        AccountEntity entity = mapper.map(accountDto, AccountEntity.class);
+        return entity;
     }
 
     @Override
-    public UserDto toDto(UserEntity userEntity) {
-        UserDto userDto = mapper.map(userEntity, UserDto.class);
-        AccountEntity accountEntity = userEntity.getAccount();
-        AccountDto accountDto = mapper.map(accountEntity, AccountDto.class);
+    public AccountDto toDto(AccountEntity accountEntity) {
+        AccountDto dto = mapper.map(accountEntity, AccountDto.class);
         List<RoleDto> roleDtos = accountEntity.getRoles().stream().map(roleEntity -> mapper.map(roleEntity, RoleDto.class)).collect(Collectors.toList());
-        accountDto.setRoles(roleDtos);
-        userDto.setAccount(accountDto);
-        return userDto;
+        dto.setRoles(roleDtos);
+        if (accountEntity.getUser() != null) {
+            dto.setUser(mapper.map(accountEntity.getUser(), UserDto.class));
+        }
+        return dto;
     }
 }

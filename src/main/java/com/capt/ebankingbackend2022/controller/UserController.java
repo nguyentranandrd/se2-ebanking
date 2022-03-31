@@ -1,5 +1,6 @@
 package com.capt.ebankingbackend2022.controller;
 
+import com.capt.ebankingbackend2022.dto.AccountDto;
 import com.capt.ebankingbackend2022.dto.UserDto;
 import com.capt.ebankingbackend2022.service.UserService;
 import com.capt.ebankingbackend2022.utils.Response;
@@ -30,28 +31,28 @@ public class UserController {
 
     @PostMapping("/update/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<Response<UserDto>> updateUserInfo(@PathVariable("id") Long accountId, @RequestBody UserDto userDto) {
+    public ResponseEntity<Response<AccountDto>> updateUserInfo(@PathVariable("id") Long accountId, @RequestBody UserDto userDto) {
         return userService.updateUserInfo(accountId, userDto);
     }
 
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<Response<UserDto>> getUserByAccountId(@PathVariable Long id) {
+    public ResponseEntity<Response<AccountDto>> getUserByAccountId(@PathVariable Long id) {
         return userService.getUserByAccountId(id);
     }
 
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public ResponseEntity<Response<UserDto>> getLoggedUserInfo() {
+    public ResponseEntity<Response<AccountDto>> getLoggedUserInfo() {
         return userService.getLoggedUserInfo();
     }
 
 
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<Response<Page<UserDto>>> getUsers(Pageable pageable) {
+    public ResponseEntity<Response<Page<AccountDto>>> getUsers(Pageable pageable) {
         return userService.getPageableUsers(pageable);
     }
 

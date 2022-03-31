@@ -14,5 +14,7 @@ import java.util.List;
 public class AccountDto extends BaseDto {
     private String phoneNumber;
 
+    private UserDto user;
+
     private List<RoleDto> roles;
 }

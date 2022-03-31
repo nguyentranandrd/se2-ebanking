@@ -4,7 +4,7 @@ import com.capt.ebankingbackend2022.dto.AccountDto;
 import com.capt.ebankingbackend2022.dto.UserDto;
 import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.UserEntity;
-import com.capt.ebankingbackend2022.mapper.UserMapper;
+import com.capt.ebankingbackend2022.mapper.AccountMapper;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
 import com.capt.ebankingbackend2022.repository.UserRepository;
 import com.capt.ebankingbackend2022.service.UserService;
@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.function.Function;
 
 @Service
 public class UserServiceImpl extends BaseServiceImpl implements UserService {
@@ -32,10 +33,10 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private UserMapper userMapper;
+    private AccountMapper accountMapper;
 
     @Override
-    public ResponseEntity<Response<UserDto>> updateUserInfo(Long accountId, UserDto userDto) {
+    public ResponseEntity<Response<AccountDto>> updateUserInfo(Long accountId, UserDto userDto) {
         AccountEntity account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Account not found"), HttpStatus.BAD_REQUEST);
@@ -51,7 +52,7 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
         return updateUser(account, userDto);
     }
 
-    private ResponseEntity<Response<UserDto>> updateUser(AccountEntity account, UserDto userDto) {
+    private ResponseEntity<Response<AccountDto>> updateUser(AccountEntity account, UserDto userDto) {
         if (userRepository.existsByEmail(userDto.getEmail()) && !account.getUser().getEmail().equals(userDto.getEmail())) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Email is existed"), HttpStatus.BAD_REQUEST);
         }
@@ -61,12 +62,12 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
         userEntity.setLastName(userDto.getLastName());
         userEntity.setAvatar(userDto.getAvatar());
         userEntity.setAddress(userDto.getAddress());
-        accountRepository.save(account);
-        userDto = userMapper.toDto(userEntity);
-        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Update user info successfully", userDto), HttpStatus.OK);
+        account = accountRepository.save(account);
+        AccountDto accountDto = accountMapper.toDto(account);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Update user info successfully", accountDto), HttpStatus.OK);
     }
 
-    private ResponseEntity<Response<UserDto>> createUser(AccountEntity account, UserDto userDto) {
+    private ResponseEntity<Response<AccountDto>> createUser(AccountEntity account, UserDto userDto) {
         if (userRepository.existsByCitizenIdentification(userDto.getCitizenIdentification())) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Citizen identification is existed"), HttpStatus.BAD_REQUEST);
         }
@@ -77,50 +78,39 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
         UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
         userEntity.setId(account.getId());
         userEntity.setAccount(account);
-        userEntity = userRepository.save(userEntity);
-        AccountDto accountDto = modelMapper.map(account, AccountDto.class);
-        UserDto userBodyResponseDto = modelMapper.map(userEntity, UserDto.class);
-        userBodyResponseDto.setAccount(accountDto);
-        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Save user info successfully", userBodyResponseDto), HttpStatus.OK);
+        userRepository.save(userEntity);
+        AccountDto accountDto = accountMapper.toDto(account);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Save user info successfully", accountDto), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Response<UserDto>> getLoggedUserInfo() {
+    public ResponseEntity<Response<AccountDto>> getLoggedUserInfo() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         AccountEntity account = accountRepository.findByPhoneNumber(userDetails.getUsername());
-        UserDto userDto = getUserByAccount(account);
-        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, userDto), HttpStatus.OK);
+        AccountDto accountDto = accountMapper.toDto(account);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, accountDto), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Response<UserDto>> getUserByAccountId(Long id) {
+    public ResponseEntity<Response<AccountDto>> getUserByAccountId(Long id) {
         AccountEntity account = accountRepository.findById(id).orElse(null);
         if (account == null)
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, ""), HttpStatus.BAD_REQUEST);
-        UserDto userDto = getUserByAccount(account);
-        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, userDto), HttpStatus.OK);
+        AccountDto accountDto = accountMapper.toDto(account);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, accountDto), HttpStatus.OK);
     }
 
-
-    private UserDto getUserByAccount(AccountEntity account) {
-        UserEntity userEntity = account.getUser();
-        if (userEntity == null) {
-            userEntity = new UserEntity();
-            userEntity.setAccount(account);
-        }
-        return userMapper.toDto(userEntity);
-    }
 
     @Override
-    public ResponseEntity<Response<Page<UserDto>>> getPageableUsers(Pageable pageable) {
+    public ResponseEntity<Response<Page<AccountDto>>> getPageableUsers(Pageable pageable) {
         Page<AccountEntity> accountEntityPage;
         try {
             accountEntityPage = accountRepository.findAll(pageable);
         } catch (PropertyReferenceException exception) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "sort param not found"), HttpStatus.BAD_REQUEST);
         }
-        Page<UserDto> userDtoPage = accountEntityPage.map(this::getUserByAccount);
-        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", userDtoPage), HttpStatus.OK);
+        Page<AccountDto> accountDtoPage = accountEntityPage.map(accountEntity -> accountMapper.toDto(accountEntity));
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", accountDtoPage), HttpStatus.OK);
     }
 }
