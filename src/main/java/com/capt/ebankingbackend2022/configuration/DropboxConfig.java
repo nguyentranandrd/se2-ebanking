@@ -26,7 +26,7 @@ public class DropboxConfig {
     private String dropboxAppSecret;
 
     @Bean
-    public DbxClientV2 DropboxClient() throws DbxException {
+    public DbxClientV2 getClient() throws DbxException {
         DbxRequestConfig config = DbxRequestConfig.newBuilder(Const.DROP_BOX_CONTEXT_PATH).build();
         DbxClientV2 client;
         try {
