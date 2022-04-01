@@ -7,7 +7,7 @@ import com.capt.ebankingbackend2022.entity.UserEntity;
 import com.capt.ebankingbackend2022.mapper.AccountMapper;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
 import com.capt.ebankingbackend2022.repository.UserRepository;
-import com.capt.ebankingbackend2022.service.UserService;
+import com.capt.ebankingbackend2022.service.AccountService;
 import com.capt.ebankingbackend2022.utils.RegexValidationUtil;
 import com.capt.ebankingbackend2022.utils.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.function.Function;
 
 @Service
-public class UserServiceImpl extends BaseServiceImpl implements UserService {
+public class AccountServiceImpl extends BaseServiceImpl implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
@@ -34,6 +34,9 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
 
     @Autowired
     private AccountMapper accountMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public ResponseEntity<Response<AccountDto>> updateUserInfo(Long accountId, UserDto userDto) {
@@ -112,5 +115,37 @@ public class UserServiceImpl extends BaseServiceImpl implements UserService {
         }
         Page<AccountDto> accountDtoPage = accountEntityPage.map(accountEntity -> accountMapper.toDto(accountEntity));
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", accountDtoPage), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Response<Boolean>> deleteAccount(Long id) {
+        if (!accountRepository.existsById(id))
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "account not found", false), HttpStatus.BAD_REQUEST);
+        accountRepository.deleteById(id);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "delete success", true), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Response<Boolean>> changePassword(String previousPass, String newPassword) {
+        AccountEntity account = getLoggedAccount();
+        if (!passwordEncoder.matches(previousPass, account.getPassword())) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "password is not true", false), HttpStatus.BAD_REQUEST);
+        }
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "change password success", true), HttpStatus.OK);
+    }
+
+    @Override
+    public void updateAvatar(String url) {
+        AccountEntity account = getLoggedAccount();
+        account.getUser().setAvatar(url);
+        accountRepository.save(account);
+    }
+
+    private AccountEntity getLoggedAccount() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        return accountRepository.findByPhoneNumber(userDetails.getUsername());
     }
 }

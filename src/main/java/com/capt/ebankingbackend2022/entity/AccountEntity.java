@@ -32,10 +32,6 @@ public class AccountEntity extends BaseEntity {
 
     @Override
     public String toString() {
-        return "AccountEntity{" +
-                "phoneNumber='" + phoneNumber + '\'' +
-                ", password='" + password + '\'' +
-                ", user=" + user +
-                '}';
+        return "AccountEntity{" + "phoneNumber='" + phoneNumber + '\'' + ", password='" + password + '\'' + ", user=" + user + '}';
     }
 }

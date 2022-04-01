@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-public interface UserService {
+public interface AccountService {
     ResponseEntity<Response<AccountDto>> updateUserInfo(Long accountId, UserDto userDto);
 
     ResponseEntity<Response<AccountDto>> getLoggedUserInfo();
@@ -15,4 +15,10 @@ public interface UserService {
     ResponseEntity<Response<AccountDto>> getUserByAccountId(Long id);
 
     ResponseEntity<Response<Page<AccountDto>>> getPageableUsers(Pageable pageable);
+
+    ResponseEntity<Response<Boolean>> deleteAccount(Long id);
+
+    ResponseEntity<Response<Boolean>> changePassword(String previousPass, String newPassword);
+
+    void updateAvatar(String path);
 }

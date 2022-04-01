@@ -14,7 +14,7 @@ public class RoleEntity extends BaseEntity {
     @Column(name = "name", unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "roles", cascade=CascadeType.ALL)
+    @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)
     private List<AccountEntity> accounts;
 
     @Override
