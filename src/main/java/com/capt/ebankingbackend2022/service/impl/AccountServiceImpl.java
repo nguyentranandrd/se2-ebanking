@@ -132,6 +132,7 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "password is not true", false), HttpStatus.BAD_REQUEST);
         }
         account.setPassword(passwordEncoder.encode(newPassword));
+        account.setUpdatedAt(new Date());
         accountRepository.save(account);
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "change password success", true), HttpStatus.OK);
     }
@@ -140,7 +141,20 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
     public void updateAvatar(String url) {
         AccountEntity account = getLoggedAccount();
         account.getUser().setAvatar(url);
+        account.getUser().setUpdatedAt(new Date());
         accountRepository.save(account);
+    }
+
+    @Override
+    public ResponseEntity<Response<Boolean>> updateAccountBalance(Long id, double balance) {
+        AccountEntity accountEntity = accountRepository.findById(id).orElse(null);
+        if (accountEntity == null)
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Account not found", false), HttpStatus.BAD_REQUEST);
+        if (balance < 0)
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Balance must be greater than 0", false), HttpStatus.BAD_REQUEST);
+        accountEntity.setBalance(balance);
+        accountRepository.save(accountEntity);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Update balance success. Current balance is " + balance, true), HttpStatus.OK);
     }
 
     private AccountEntity getLoggedAccount() {

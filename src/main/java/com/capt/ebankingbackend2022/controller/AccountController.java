@@ -99,4 +99,11 @@ public class AccountController {
         }
         return res;
     }
+
+
+    @PatchMapping("/{id}/balance")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<Response<Boolean>> setAccountBalance(@PathVariable("id") Long id, @RequestPart("balance") double balance) {
+        return accountService.updateAccountBalance(id, balance);
+    }
 }

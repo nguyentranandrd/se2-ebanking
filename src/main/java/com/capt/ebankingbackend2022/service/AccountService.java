@@ -21,4 +21,6 @@ public interface AccountService {
     ResponseEntity<Response<Boolean>> changePassword(String previousPass, String newPassword);
 
     void updateAvatar(String path);
+
+    ResponseEntity<Response<Boolean>> updateAccountBalance(Long id, double balance);
 }
