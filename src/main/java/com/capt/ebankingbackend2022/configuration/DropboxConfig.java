@@ -28,13 +28,10 @@ public class DropboxConfig {
     @Value("${dropbox.access.lltoken}")
     private String llToken;
 
-    @Value("${dropbox.context.path}")
-    private String dropboxContext;
-
 
     @Bean
     public DbxClientV2 getClient() throws DbxException {
-        DbxRequestConfig config = DbxRequestConfig.newBuilder(dropboxContext).build();
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("").build();
         DbxClientV2 client;
         try {
             DbxCredential credentials = new DbxCredential(dropboxAccessToken, -1L, dropboxRefreshToken, dropboxAppKey, dropboxAppSecret);
