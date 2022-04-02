@@ -1,4 +1,4 @@
-package com.capt.ebankingbackend2022.configuration;
+package com.capt.ebankingbackend2022.utils;
 
 import com.capt.ebankingbackend2022.utils.Const;
 import com.dropbox.core.*;

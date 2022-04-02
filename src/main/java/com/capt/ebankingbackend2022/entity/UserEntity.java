@@ -40,7 +40,7 @@ public class UserEntity {
     @Column(name = "avatar", length = 1024)
     private String avatar;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private AccountEntity account;
 

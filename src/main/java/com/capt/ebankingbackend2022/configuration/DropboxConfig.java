@@ -25,9 +25,16 @@ public class DropboxConfig {
     @Value("${dropbox.app.secret}")
     private String dropboxAppSecret;
 
+    @Value("${dropbox.access.lltoken}")
+    private String llToken;
+
+    @Value("${dropbox.context.path}")
+    private String dropboxContext;
+
+
     @Bean
     public DbxClientV2 getClient() throws DbxException {
-        DbxRequestConfig config = DbxRequestConfig.newBuilder(Const.DROP_BOX_CONTEXT_PATH).build();
+        DbxRequestConfig config = DbxRequestConfig.newBuilder(dropboxContext).build();
         DbxClientV2 client;
         try {
             DbxCredential credentials = new DbxCredential(dropboxAccessToken, -1L, dropboxRefreshToken, dropboxAppKey, dropboxAppSecret);
@@ -39,7 +46,7 @@ public class DropboxConfig {
             return client;
         } catch (DbxException e) {
             System.out.println("Short live access token not work. Using long live instead. Error: " + e.getMessage());
-            client = new DbxClientV2(config, Const.LONG_LIVED_DROP_BOX_ACCESS_TOKEN);
+            client = new DbxClientV2(config, llToken);
             FullAccount account = client.users().getCurrentAccount();
             assert account != null;
             System.out.println(account.getName().getDisplayName());

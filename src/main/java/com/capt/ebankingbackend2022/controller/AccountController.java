@@ -89,8 +89,9 @@ public class AccountController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response<Boolean>> deleteAccount(@PathVariable("id") Long id) {
+        String avt = accountService.getUserAvatar(id);
         ResponseEntity<Response<Boolean>> res = accountService.deleteAccount(id);
-        if (res.getBody().getStatus() == Response.STATUS_SUCCESS) {
+        if (res.getBody().getStatus() == Response.STATUS_SUCCESS && avt != null) {
             try {
                 dropboxService.deleteFile("/user/avatar/" + id);
             } catch (DbxException e) {

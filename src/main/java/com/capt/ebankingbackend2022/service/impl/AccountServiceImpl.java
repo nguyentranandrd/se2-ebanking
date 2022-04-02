@@ -121,6 +121,8 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
     public ResponseEntity<Response<Boolean>> deleteAccount(Long id) {
         if (!accountRepository.existsById(id))
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "account not found", false), HttpStatus.BAD_REQUEST);
+        if (userRepository.existsById(id))
+            userRepository.deleteById(id);
         accountRepository.deleteById(id);
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "delete success", true), HttpStatus.OK);
     }
@@ -155,6 +157,13 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
         accountEntity.setBalance(balance);
         accountRepository.save(accountEntity);
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Update balance success. Current balance is " + balance, true), HttpStatus.OK);
+    }
+
+    @Override
+    public String getUserAvatar(Long id) {
+        UserEntity user = userRepository.findById(id).orElse(null);
+        if (user == null) return null;
+        return user.getAvatar();
     }
 
     private AccountEntity getLoggedAccount() {

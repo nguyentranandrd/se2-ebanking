@@ -23,4 +23,7 @@ public interface AccountService {
     void updateAvatar(String path);
 
     ResponseEntity<Response<Boolean>> updateAccountBalance(Long id, double balance);
+
+
+    String getUserAvatar(Long id);
 }
