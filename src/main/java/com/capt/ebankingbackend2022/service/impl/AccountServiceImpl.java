@@ -62,6 +62,7 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
         UserEntity userEntity = account.getUser();
         userEntity.setUpdatedAt(new Date());
         userEntity.setFirstName(userDto.getFirstName());
+        userEntity.setEmail(userDto.getEmail());
         userEntity.setLastName(userDto.getLastName());
         userEntity.setAvatar(userDto.getAvatar());
         userEntity.setAddress(userDto.getAddress());
