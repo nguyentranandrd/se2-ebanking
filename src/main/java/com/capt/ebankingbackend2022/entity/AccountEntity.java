@@ -1,7 +1,9 @@
 package com.capt.ebankingbackend2022.entity;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -29,6 +31,8 @@ public class AccountEntity extends BaseEntity {
     @JoinTable(name = "account_role", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
+    @OneToMany(mappedBy = "owner")
+    private List<TransactionEntity> transactions;
 
     @Override
     public String toString() {
