@@ -1,6 +1,7 @@
 package com.capt.ebankingbackend2022.service.impl;
 
 import com.capt.ebankingbackend2022.dto.TransactionDto;
+import com.capt.ebankingbackend2022.dto.TransferRequestDto;
 import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.TransactionEntity;
 import com.capt.ebankingbackend2022.repository.AccountRepository;
@@ -32,7 +33,23 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
         if (accountEntity.getBalance() < amount) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the withdraw amount must be lower than the current balance"), HttpStatus.BAD_REQUEST);
         }
-        return updateBalance(accountEntity, -amount,TransactionType.WITHDRAW);
+        TransactionDto transaction = createTransaction(accountEntity, -amount, TransactionType.WITHDRAW);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transaction), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Response<TransactionDto>> transferMoney(Long loggedUserId, TransferRequestDto transferRequestDto) {
+        if (transferRequestDto.getAmount() <= 0) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the transfer amount must be greater than 0"), HttpStatus.BAD_REQUEST);
+        }
+        AccountEntity fromAccount = accountRepository.getById(loggedUserId);
+        AccountEntity toAccount = accountRepository.getById(transferRequestDto.getToAccount());
+        if (fromAccount.getBalance() < transferRequestDto.getAmount()) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the transfer amount must be lower than the current balance"), HttpStatus.BAD_REQUEST);
+        }
+        createTransaction(toAccount, transferRequestDto.getAmount(), TransactionType.RECEIVE_TRANSFER);
+        TransactionDto transaction = createTransaction(fromAccount, -transferRequestDto.getAmount(), TransactionType.SEND_TRANSFER);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transaction), HttpStatus.OK);
     }
 
     @Override
@@ -41,10 +58,12 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the deposit amount must be greater than 0"), HttpStatus.BAD_REQUEST);
         }
         AccountEntity accountEntity = accountRepository.getById(loggedUserId);
-        return updateBalance(accountEntity, amount,TransactionType.DEPOSIT);
+        TransactionDto transaction = createTransaction(accountEntity, amount, TransactionType.DEPOSIT);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transaction), HttpStatus.OK);
+
     }
 
-    private ResponseEntity<Response<TransactionDto>> updateBalance(AccountEntity accountEntity, double amount, String type) {
+    private TransactionDto createTransaction(AccountEntity accountEntity, double amount, String type) {
         TransactionEntity transaction = new TransactionEntity();
         transaction.setBalanceBefore(accountEntity.getBalance());
         accountEntity.setBalance(accountEntity.getBalance() + amount);
@@ -55,6 +74,6 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
         transaction.setCreatedAt(new Date());
         transaction = transactionRepository.save(transaction);
         TransactionDto transactionDto = modelMapper.map(transaction, TransactionDto.class);
-        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transactionDto), HttpStatus.OK);
+        return transactionDto;
     }
 }
