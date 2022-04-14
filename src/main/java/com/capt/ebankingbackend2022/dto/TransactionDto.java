@@ -13,4 +13,5 @@ public class TransactionDto extends BaseDto {
     private double balanceBefore;
     private double balanceAfter;
     private String transactionType;
+    private double amount;
 }

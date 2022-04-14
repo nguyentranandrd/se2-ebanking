@@ -14,13 +14,15 @@ public class TransactionEntity extends BaseEntity {
     private double balanceBefore;
     @Column(name = "balance_after")
     private double balanceAfter;
+    @Column(name = "amount")
+    private double amount;
     @Column(name = "transaction_type")
     private String transactionType;
-    @OneToOne(mappedBy = "transaction")
-    private TranferEntity tranfer;
+    @OneToOne(mappedBy = "fromTransaction")
+    private TransferEntity fromTransfer;
+    @OneToOne(mappedBy = "toTransaction")
+    private TransferEntity toTransfer;
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private AccountEntity owner;
-
-
 }

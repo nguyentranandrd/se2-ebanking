@@ -11,7 +11,7 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @Table(name = "fr_transfer")
-public class TranferEntity extends BaseEntity {
+public class TransferEntity extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "from_account_id", referencedColumnName = "id")
     private AccountEntity fromAccount;
@@ -21,6 +21,10 @@ public class TranferEntity extends BaseEntity {
     private AccountEntity toAccount;
 
     @OneToOne
-    @JoinColumn(name = "transaction_id", referencedColumnName = "id")
-    private TransactionEntity transaction;
+    @JoinColumn(name = "from_transaction_id", referencedColumnName = "id")
+    private TransactionEntity fromTransaction;
+
+    @OneToOne
+    @JoinColumn(name = "to_transaction_id", referencedColumnName = "id")
+    private TransactionEntity toTransaction;
 }
