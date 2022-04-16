@@ -75,7 +75,6 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
         TransactionEntity transaction = createTransaction(accountEntity, amount, TransactionType.DEPOSIT);
         TransactionDto transactionDto = modelMapper.map(transaction, TransactionDto.class);
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transactionDto), HttpStatus.OK);
-
     }
 
     private TransactionEntity createTransaction(AccountEntity accountEntity, double amount, String type) {
