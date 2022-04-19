@@ -18,7 +18,7 @@ public class RegexValidationUtil {
     }
 
     public static boolean is10NumberPhone(String phoneNumber) {
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(phoneNumber);
+        Matcher matcher = VALID_PHONE_NUMBER_PATTERN.matcher(phoneNumber);
         return matcher.find();
     }
 }

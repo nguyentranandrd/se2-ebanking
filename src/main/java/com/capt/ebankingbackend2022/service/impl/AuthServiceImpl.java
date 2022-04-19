@@ -87,7 +87,7 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
         userEntity.setRoles(Collections.singletonList(role));
         if (accountRepository.existsByPhoneNumber(userDto.getPhoneNumber()))
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "phone number has been used"), HttpStatus.BAD_REQUEST);
-        if (RegexValidationUtil.is10NumberPhone(userDto.getPhoneNumber())) {
+        if (!RegexValidationUtil.is10NumberPhone(userDto.getPhoneNumber())) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Invalid phone number (ex: 0123456789 or +840123456789)"), HttpStatus.BAD_REQUEST);
         }
         if (roleString.equals(Authority.ADMIN)) {
