@@ -76,7 +76,8 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
         transfer.setToTransaction(toAccountTransaction);
         transfer.setFromTransaction(fromAccountTransaction);
         transferRepository.save(transfer);
-        TransactionDto transactionDto = modelMapper.map(fromAccountTransaction, TransactionDto.class);
+        fromAccountTransaction.setFromTransfer(transfer);
+        TransactionDto transactionDto = transactionMapper.toDto(fromAccountTransaction);
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transactionDto), HttpStatus.OK);
     }
 

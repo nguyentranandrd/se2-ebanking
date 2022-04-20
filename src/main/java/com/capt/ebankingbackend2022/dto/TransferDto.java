@@ -1,7 +1,14 @@
 package com.capt.ebankingbackend2022.dto;
 
-public class TransferDto extends BaseDto {
-    private AccountDto fromAccount;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-    private AccountDto toAccount;
+@Data
+@Getter
+@Setter
+public class TransferDto extends BaseDto {
+    private TransferAccountDto fromAccount;
+
+    private TransferAccountDto toAccount;
 }

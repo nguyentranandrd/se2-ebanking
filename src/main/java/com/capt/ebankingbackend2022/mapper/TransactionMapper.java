@@ -3,6 +3,7 @@ package com.capt.ebankingbackend2022.mapper;
 import com.capt.ebankingbackend2022.dto.LoanDto;
 import com.capt.ebankingbackend2022.dto.SavingDto;
 import com.capt.ebankingbackend2022.dto.TransactionDto;
+import com.capt.ebankingbackend2022.dto.TransferDto;
 import com.capt.ebankingbackend2022.entity.TransactionEntity;
 import com.capt.ebankingbackend2022.utils.TransactionType;
 import org.modelmapper.ModelMapper;
@@ -16,6 +17,9 @@ public class TransactionMapper extends BaseMapper<TransactionEntity, Transaction
 
     @Autowired
     private LoanMapper loanMapper;
+
+    @Autowired
+    private TransferMapper transferMapper;
 
     @Autowired
     public TransactionMapper(ModelMapper mapper) {
@@ -43,6 +47,19 @@ public class TransactionMapper extends BaseMapper<TransactionEntity, Transaction
                     transactionDto.setLoan(savingDto);
                 }
                 break;
+            case TransactionType.SEND_TRANSFER:
+                if (transactionEntity.getFromTransfer() != null) {
+                    TransferDto fromTransfer = transferMapper.toDto(transactionEntity.getFromTransfer());
+                    transactionDto.setFromTransfer(fromTransfer);
+                }
+                break;
+            case TransactionType.RECEIVE_TRANSFER:
+                if (transactionEntity.getToTransfer() != null) {
+                    TransferDto toTransfer = transferMapper.toDto(transactionEntity.getToTransfer());
+                    transactionDto.setToTransfer(toTransfer);
+                }
+                break;
+
         }
         return transactionDto;
     }
