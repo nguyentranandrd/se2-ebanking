@@ -1,15 +1,16 @@
 package com.capt.ebankingbackend2022.service.impl;
 
+import com.capt.ebankingbackend2022.dto.CreateLoanDto;
+import com.capt.ebankingbackend2022.dto.CreateSavingDto;
 import com.capt.ebankingbackend2022.dto.TransactionDto;
 import com.capt.ebankingbackend2022.dto.TransferRequestDto;
-import com.capt.ebankingbackend2022.entity.AccountEntity;
-import com.capt.ebankingbackend2022.entity.TransactionEntity;
-import com.capt.ebankingbackend2022.entity.TransferEntity;
-import com.capt.ebankingbackend2022.repository.AccountRepository;
-import com.capt.ebankingbackend2022.repository.TransactionRepository;
-import com.capt.ebankingbackend2022.repository.TransferRepository;
+import com.capt.ebankingbackend2022.entity.*;
+import com.capt.ebankingbackend2022.mapper.TransactionMapper;
+import com.capt.ebankingbackend2022.repository.*;
 import com.capt.ebankingbackend2022.service.TransactionService;
+import com.capt.ebankingbackend2022.utils.InterestType;
 import com.capt.ebankingbackend2022.utils.Response;
+import com.capt.ebankingbackend2022.utils.TransactionStatus;
 import com.capt.ebankingbackend2022.utils.TransactionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,19 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
     @Autowired
     private TransferRepository transferRepository;
 
+    @Autowired
+    private InterestRepository interestRepository;
+
+    @Autowired
+    private SavingRepository savingRepository;
+
+    @Autowired
+    private LoanRepository loanRepository;
+
+    @Autowired
+    private TransactionMapper transactionMapper;
+
+
     @Override
     public ResponseEntity<Response<TransactionDto>> withdrawMoney(long id, double amount) {
         if (amount <= 0) {
@@ -44,7 +58,7 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
     }
 
     @Override
-    public ResponseEntity<Response<TransactionDto>> transferMoney(Long loggedUserId, TransferRequestDto transferRequestDto) {
+    public ResponseEntity<Response<TransactionDto>> transferMoney(long loggedUserId, TransferRequestDto transferRequestDto) {
         if (transferRequestDto.getAmount() <= 0) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the transfer amount must be greater than 0"), HttpStatus.BAD_REQUEST);
         }
@@ -77,12 +91,77 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transactionDto), HttpStatus.OK);
     }
 
-    private TransactionEntity createTransaction(AccountEntity accountEntity, double amount, String type) {
+
+    @Override
+    public ResponseEntity<Response<TransactionDto>> createSaving(long loggedUserId, CreateSavingDto createSavingDto) {
+        if (createSavingDto.getAmount() <= 0) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the saving amount must be greater than 0"), HttpStatus.BAD_REQUEST);
+        }
+        AccountEntity accountEntity = accountRepository.getById(loggedUserId);
+        if (accountEntity.getBalance() < createSavingDto.getAmount()) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the saving amount must be lower than the current balance"), HttpStatus.BAD_REQUEST);
+        }
+        InterestEntity interestEntity = interestRepository.findById(createSavingDto.getInterestId()).orElse(null);
+
+        if (interestEntity == null) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "interest is not found"), HttpStatus.BAD_REQUEST);
+        }
+        if (!interestEntity.getType().equals(InterestType.SAVING)) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "interest type must be saving"), HttpStatus.BAD_REQUEST);
+        }
+        TransactionEntity transaction = createTransaction(accountEntity, -createSavingDto.getAmount(), TransactionType.START_SAVING);
+        SavingEntity savingEntity = new SavingEntity();
+        savingEntity.setCreatedAt(new Date());
+        savingEntity.setStartTime(new Date());
+        Date endDate = new Date(System.currentTimeMillis() + interestEntity.getDuration());
+        savingEntity.setEndTime(endDate);
+        savingEntity.setInterest(interestEntity);
+        savingEntity.setHasMaturity(createSavingDto.isHasMaturity());
+        savingEntity.setMaturityWithProfit(createSavingDto.isMaturityWithProfit());
+        savingEntity.setTransaction(transaction);
+        savingEntity.setStatus(TransactionStatus.IN_PROGRESS);
+        savingEntity = savingRepository.save(savingEntity);
+        transaction.setSaving(savingEntity);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "create saving successfully",
+                transactionMapper.toDto(transaction)), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Response<TransactionDto>> createLoan(Long loggedUserId, CreateLoanDto createLoanDto) {
+        if (createLoanDto.getAmount() <= 0) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the loan amount must be greater than 0"), HttpStatus.BAD_REQUEST);
+        }
+        AccountEntity accountEntity = accountRepository.getById(loggedUserId);
+        InterestEntity interestEntity = interestRepository.findById(createLoanDto.getInterestId()).orElse(null);
+        if (interestEntity == null) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "interest is not found"), HttpStatus.BAD_REQUEST);
+        }
+        if (!interestEntity.getType().equals(InterestType.LOAN)) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "interest type must be loan"), HttpStatus.BAD_REQUEST);
+        }
+        TransactionEntity transaction = createTransaction(accountEntity, createLoanDto.getAmount(), TransactionType.START_LOAN);
+        LoanEntity loanEntity = new LoanEntity();
+        loanEntity.setCreatedAt(new Date());
+        loanEntity.setStartTime(new Date());
+        Date endDate = new Date(System.currentTimeMillis() + interestEntity.getDuration());
+        loanEntity.setEndTime(endDate);
+        loanEntity.setInterest(interestEntity);
+        loanEntity.setTransaction(transaction);
+        loanEntity.setStatus(TransactionStatus.IN_PROGRESS);
+        loanEntity = loanRepository.save(loanEntity);
+        transaction.setLoan(loanEntity);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "create loan successfully",
+                transactionMapper.toDto(transaction)), HttpStatus.OK);
+
+    }
+
+
+    private TransactionEntity createTransaction(AccountEntity accountEntity, double changingAmount, String type) {
         TransactionEntity transaction = new TransactionEntity();
         transaction.setBalanceBefore(accountEntity.getBalance());
-        accountEntity.setBalance(accountEntity.getBalance() + amount);
+        accountEntity.setBalance(accountEntity.getBalance() + changingAmount);
         accountRepository.save(accountEntity);
-        transaction.setAmount(amount);
+        transaction.setAmount(Math.abs(changingAmount));
         transaction.setBalanceAfter(accountEntity.getBalance());
         transaction.setOwner(accountEntity);
         transaction.setTransactionType(type);

@@ -1,7 +1,6 @@
 package com.capt.ebankingbackend2022.controller;
 
-import com.capt.ebankingbackend2022.dto.TransactionDto;
-import com.capt.ebankingbackend2022.dto.TransferRequestDto;
+import com.capt.ebankingbackend2022.dto.*;
 import com.capt.ebankingbackend2022.service.AccountService;
 import com.capt.ebankingbackend2022.service.TransactionService;
 import com.capt.ebankingbackend2022.utils.Response;
@@ -40,5 +39,19 @@ public class TransactionController {
     public ResponseEntity<Response<TransactionDto>> transferMoney(@RequestBody TransferRequestDto transferRequestDto) {
         Long loggedUserId = accountService.getLoggedUserInfo().getBody().getData().getId();
         return transactionService.transferMoney(loggedUserId, transferRequestDto);
+    }
+
+    @PostMapping("/saving")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<TransactionDto>> createSaving(@RequestBody CreateSavingDto createSavingDto) {
+        Long loggedUserId = accountService.getLoggedUserInfo().getBody().getData().getId();
+        return transactionService.createSaving(loggedUserId, createSavingDto);
+    }
+
+    @PostMapping("/loan")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<TransactionDto>> createLoan(@RequestBody CreateLoanDto createLoanDto) {
+        Long loggedUserId = accountService.getLoggedUserInfo().getBody().getData().getId();
+        return transactionService.createLoan(loggedUserId, createLoanDto);
     }
 }

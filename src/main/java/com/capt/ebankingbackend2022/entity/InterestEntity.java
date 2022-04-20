@@ -1,6 +1,8 @@
 package com.capt.ebankingbackend2022.entity;
 
-import lombok.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,4 +22,5 @@ public class InterestEntity extends BaseEntity {
     private long duration;
     @Column
     private String type; //(saving/loan)
+
 }

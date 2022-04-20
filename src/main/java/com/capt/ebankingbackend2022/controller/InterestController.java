@@ -1,10 +1,9 @@
 package com.capt.ebankingbackend2022.controller;
 
-import com.capt.ebankingbackend2022.dto.AccountDto;
 import com.capt.ebankingbackend2022.dto.InterestDto;
+import com.capt.ebankingbackend2022.dto.TransactionDto;
 import com.capt.ebankingbackend2022.service.InterestService;
 import com.capt.ebankingbackend2022.utils.Response;
-import com.dropbox.core.DbxException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,5 +40,7 @@ public class InterestController {
     public ResponseEntity<Response<Boolean>> deleteInterest(@PathVariable("id") Long id) {
         return interestService.deleteInterest(id);
     }
+
+
 
 }
