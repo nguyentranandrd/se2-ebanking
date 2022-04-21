@@ -18,4 +18,6 @@ public interface TransactionService {
     ResponseEntity<Response<TransactionDto>> createSaving(long loggedUserId, CreateSavingDto createSavingDto);
 
     ResponseEntity<Response<TransactionDto>> createLoan(Long loggedUserId, CreateLoanDto createLoanDto);
+
+    void completeSavingAndLoan();
 }

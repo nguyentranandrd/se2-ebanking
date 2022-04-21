@@ -156,6 +156,11 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
 
     }
 
+    @Override
+    public void completeSavingAndLoan() {
+
+    }
+
 
     private TransactionEntity createTransaction(AccountEntity accountEntity, double changingAmount, String type) {
         TransactionEntity transaction = new TransactionEntity();
