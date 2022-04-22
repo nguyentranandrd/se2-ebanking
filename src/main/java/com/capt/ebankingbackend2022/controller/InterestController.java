@@ -18,7 +18,7 @@ public class InterestController {
     private InterestService interestService;
 
     @GetMapping("")
-    @PreAuthorize("hasAuthority('admin')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<Page<InterestDto>>> getInterest(Pageable pageable) {
         return interestService.getInterests(pageable);
     }

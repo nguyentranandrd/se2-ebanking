@@ -19,5 +19,5 @@ public interface TransactionService {
 
     ResponseEntity<Response<TransactionDto>> createLoan(Long loggedUserId, CreateLoanDto createLoanDto);
 
-    void completeSavingAndLoan();
+    void resolveEndTimeSavingAndLoan();
 }

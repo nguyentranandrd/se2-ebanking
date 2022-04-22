@@ -1,8 +1,6 @@
 package com.capt.ebankingbackend2022.service.impl;
 
-import com.capt.ebankingbackend2022.dto.AccountDto;
 import com.capt.ebankingbackend2022.dto.InterestDto;
-import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.InterestEntity;
 import com.capt.ebankingbackend2022.repository.InterestRepository;
 import com.capt.ebankingbackend2022.service.InterestService;

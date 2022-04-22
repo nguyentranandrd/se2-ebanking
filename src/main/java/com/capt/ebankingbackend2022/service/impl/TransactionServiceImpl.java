@@ -17,7 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class TransactionServiceImpl extends BaseServiceImpl implements TransactionService {
@@ -157,8 +160,35 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
     }
 
     @Override
-    public void completeSavingAndLoan() {
-
+    @Transactional
+    public void resolveEndTimeSavingAndLoan() {
+        List<LoanEntity> completedLoans = loanRepository.findByStatusAndEndTimeLessThanEqual(TransactionStatus.IN_PROGRESS, new Date());
+        for (LoanEntity loan :
+                completedLoans) {
+            loan.setStatus(TransactionStatus.OVER_DUE);
+            loanRepository.save(loan);
+        }
+        List<SavingEntity> completedSavings = savingRepository.findByStatusAndEndTimeLessThanEqual(TransactionStatus.IN_PROGRESS, new Date());
+        for (SavingEntity saving :
+                completedSavings) {
+            AccountEntity owner = saving.getTransaction().getOwner();
+            InterestEntity interest = saving.getInterest();
+            saving.setStatus(TransactionStatus.COMPLETED);
+            double profit = saving.getTransaction().getAmount() * (interest.getDuration() / (double) TimeUnit.DAYS.toMillis(365));
+            if (!saving.isHasMaturity()) {
+                owner.setBalance(owner.getBalance() + saving.getTransaction().getAmount() + profit);
+            } else {
+                double amount = saving.getTransaction().getAmount();
+                if (saving.isMaturityWithProfit()) {
+                    amount += profit;
+                } else {
+                    owner.setBalance(owner.getBalance() + profit);
+                }
+                createSaving(owner.getId(), new CreateSavingDto(amount, saving.isHasMaturity(), saving.isMaturityWithProfit(), saving.getInterest().getId()));
+            }
+            accountRepository.save(owner);
+            savingRepository.save(saving);
+        }
     }
 
 

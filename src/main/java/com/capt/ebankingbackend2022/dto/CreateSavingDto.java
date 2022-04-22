@@ -1,12 +1,12 @@
 package com.capt.ebankingbackend2022.dto;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateSavingDto {
     private double amount;
 
@@ -15,4 +15,6 @@ public class CreateSavingDto {
     private boolean maturityWithProfit;
 
     private Long interestId;
+
+
 }

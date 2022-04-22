@@ -12,9 +12,9 @@ public class ScheduleConfig {
     @Autowired
     private TransactionService transactionService;
 
-    @Scheduled(cron = "0 43 11 * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void scheduleFixedDelayTask() {
         System.out.println("Task running: " + System.currentTimeMillis());
-        transactionService.completeSavingAndLoan();
+        transactionService.resolveEndTimeSavingAndLoan();
     }
 }
