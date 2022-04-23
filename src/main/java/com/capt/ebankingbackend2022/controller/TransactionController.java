@@ -4,7 +4,6 @@ import com.capt.ebankingbackend2022.dto.*;
 import com.capt.ebankingbackend2022.service.AccountService;
 import com.capt.ebankingbackend2022.service.TransactionService;
 import com.capt.ebankingbackend2022.utils.Response;
-import com.sun.tools.javac.util.List;
 import org.h2.mvstore.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
