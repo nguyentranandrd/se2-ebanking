@@ -4,6 +4,8 @@ import com.capt.ebankingbackend2022.dto.*;
 import com.capt.ebankingbackend2022.service.AccountService;
 import com.capt.ebankingbackend2022.service.TransactionService;
 import com.capt.ebankingbackend2022.utils.Response;
+import com.sun.tools.javac.util.List;
+import org.h2.mvstore.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,5 +55,10 @@ public class TransactionController {
     public ResponseEntity<Response<TransactionDto>> createLoan(@RequestBody CreateLoanDto createLoanDto) {
         Long loggedUserId = accountService.getLoggedUserInfo().getBody().getData().getId();
         return transactionService.createLoan(loggedUserId, createLoanDto);
+    }
+
+
+    public ResponseEntity<Response<Page>> getPageableTransactions(){
+        return null;
     }
 }
