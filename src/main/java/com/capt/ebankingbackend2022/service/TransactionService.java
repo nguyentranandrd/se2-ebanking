@@ -23,5 +23,5 @@ public interface TransactionService {
 
     void resolveEndTimeSavingAndLoan();
 
-    ResponseEntity<Response<Page<TransactionDto>>> getPageableTransaction(String id, Pageable pageable, String type);
+    ResponseEntity<Response<Page<TransactionDto>>> getPageableTransaction(long id, Pageable pageable, String type);
 }

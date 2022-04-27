@@ -212,12 +212,11 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
     }
 
     @Override
-    public ResponseEntity<Response<Page<TransactionDto>>> getPageableTransaction(String uId, Pageable pageable, String type) {
+    public ResponseEntity<Response<Page<TransactionDto>>> getPageableTransaction(long userId, Pageable pageable, String type) {
         if (type != null && !Arrays.asList(TransactionType.TYPES).contains(type)) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Invalid transaction type"), HttpStatus.BAD_REQUEST);
         }
-        long userId = Long.parseLong(uId);
-        Page<TransactionDto> page = null;
+        Page<TransactionDto> page;
         if (type == null)
             page = transactionRepository.getByOwnerId(userId, pageable).map(transactionEntity -> transactionMapper.toDto(transactionEntity));
         else

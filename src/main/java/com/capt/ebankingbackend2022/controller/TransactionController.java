@@ -62,6 +62,14 @@ public class TransactionController {
     @GetMapping("/histories/{id}")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response<Page<TransactionDto>>> getPageableTransactions(@PathVariable("id") String id, Pageable pageable, @RequestParam(required = false) String type) {
-        return transactionService.getPageableTransaction(id, pageable, type);
+        long userId = Long.parseLong(id);
+        return transactionService.getPageableTransaction(userId, pageable, type);
+    }
+
+    @GetMapping("/histories/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<Page<TransactionDto>>> getMyPageableTransactions(Pageable pageable, @RequestParam(required = false) String type) {
+        Long loggedUserId = accountService.getLoggedUserInfo().getBody().getData().getId();
+        return transactionService.getPageableTransaction(loggedUserId, pageable, type);
     }
 }
