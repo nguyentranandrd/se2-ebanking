@@ -69,9 +69,12 @@ public class InterestServiceImpl extends BaseServiceImpl implements InterestServ
     public ResponseEntity<Response<Boolean>> deleteInterest(Long id) {
         if (!interestRepository.existsById(id))
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "interest not found", false), HttpStatus.BAD_REQUEST);
-        interestRepository.deleteById(id);
-        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "delete success", true), HttpStatus.OK);
-
+        InterestEntity interest = interestRepository.findById(id).orElse(null);
+        if (interest.getLoans().isEmpty() && interest.getSavings().isEmpty()) {
+            interestRepository.deleteById(id);
+            return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "delete success", true), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "There is at least one saving or loan still using this interest", false), HttpStatus.BAD_REQUEST);
     }
 
     @Override

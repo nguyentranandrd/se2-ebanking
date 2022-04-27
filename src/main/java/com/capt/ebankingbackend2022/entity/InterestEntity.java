@@ -6,7 +6,9 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -23,4 +25,9 @@ public class InterestEntity extends BaseEntity {
     @Column
     private String type; //(saving/loan)
 
+    @OneToMany(mappedBy = "interest")
+    private Set<LoanEntity> loans;
+
+    @OneToMany(mappedBy = "interest")
+    private Set<LoanEntity> savings;
 }

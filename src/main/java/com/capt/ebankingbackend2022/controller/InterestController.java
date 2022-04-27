@@ -3,6 +3,7 @@ package com.capt.ebankingbackend2022.controller;
 import com.capt.ebankingbackend2022.dto.InterestDto;
 import com.capt.ebankingbackend2022.dto.TransactionDto;
 import com.capt.ebankingbackend2022.service.InterestService;
+import com.capt.ebankingbackend2022.service.TransactionService;
 import com.capt.ebankingbackend2022.utils.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class InterestController {
     @Autowired
     private InterestService interestService;
+
 
     @GetMapping("")
     @PreAuthorize("isAuthenticated()")
