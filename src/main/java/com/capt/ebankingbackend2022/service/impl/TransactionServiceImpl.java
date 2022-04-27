@@ -13,14 +13,19 @@ import com.capt.ebankingbackend2022.utils.Response;
 import com.capt.ebankingbackend2022.utils.TransactionStatus;
 import com.capt.ebankingbackend2022.utils.TransactionType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Service
 public class TransactionServiceImpl extends BaseServiceImpl implements TransactionService {
@@ -204,5 +209,19 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
         transaction.setCreatedAt(new Date());
         transaction = transactionRepository.save(transaction);
         return transaction;
+    }
+
+    @Override
+    public ResponseEntity<Response<Page<TransactionDto>>> getPageableTransaction(String uId, Pageable pageable, String type) {
+        if (type != null && !Arrays.asList(TransactionType.TYPES).contains(type)) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Invalid transaction type"), HttpStatus.BAD_REQUEST);
+        }
+        long userId = Long.parseLong(uId);
+        Page<TransactionDto> page = null;
+        if (type == null)
+            page = transactionRepository.getByOwnerId(userId, pageable).map(transactionEntity -> transactionMapper.toDto(transactionEntity));
+        else
+            page = transactionRepository.getByOwnerIdAndTransactionType(userId, type, pageable).map(transactionEntity -> transactionMapper.toDto(transactionEntity));
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", page), HttpStatus.OK);
     }
 }

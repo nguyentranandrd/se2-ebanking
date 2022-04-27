@@ -4,8 +4,10 @@ import com.capt.ebankingbackend2022.dto.*;
 import com.capt.ebankingbackend2022.service.AccountService;
 import com.capt.ebankingbackend2022.service.TransactionService;
 import com.capt.ebankingbackend2022.utils.Response;
-import org.h2.mvstore.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +59,9 @@ public class TransactionController {
     }
 
 
-    public ResponseEntity<Response<Page>> getPageableTransactions(){
-        return null;
+    @GetMapping("/histories/{id}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<Response<Page<TransactionDto>>> getPageableTransactions(@PathVariable("id") String id, Pageable pageable, @RequestParam(required = false) String type) {
+        return transactionService.getPageableTransaction(id, pageable, type);
     }
 }

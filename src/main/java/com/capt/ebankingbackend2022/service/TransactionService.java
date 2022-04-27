@@ -5,6 +5,8 @@ import com.capt.ebankingbackend2022.dto.CreateSavingDto;
 import com.capt.ebankingbackend2022.dto.TransactionDto;
 import com.capt.ebankingbackend2022.dto.TransferRequestDto;
 import com.capt.ebankingbackend2022.utils.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface TransactionService {
@@ -20,4 +22,6 @@ public interface TransactionService {
     ResponseEntity<Response<TransactionDto>> createLoan(Long loggedUserId, CreateLoanDto createLoanDto);
 
     void resolveEndTimeSavingAndLoan();
+
+    ResponseEntity<Response<Page<TransactionDto>>> getPageableTransaction(String id, Pageable pageable, String type);
 }
