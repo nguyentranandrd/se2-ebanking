@@ -70,6 +70,8 @@ public class InterestServiceImpl extends BaseServiceImpl implements InterestServ
         if (!interestRepository.existsById(id))
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "interest not found", false), HttpStatus.BAD_REQUEST);
         InterestEntity interest = interestRepository.findById(id).orElse(null);
+        System.out.println(interest.getLoans().size());
+        System.out.println(interest.getSavings().size());
         if (interest.getLoans().isEmpty() && interest.getSavings().isEmpty()) {
             interestRepository.deleteById(id);
             return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "delete success", true), HttpStatus.OK);

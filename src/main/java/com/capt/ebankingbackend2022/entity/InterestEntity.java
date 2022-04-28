@@ -29,5 +29,5 @@ public class InterestEntity extends BaseEntity {
     private Set<LoanEntity> loans;
 
     @OneToMany(mappedBy = "interest")
-    private Set<LoanEntity> savings;
+    private Set<SavingEntity> savings;
 }
