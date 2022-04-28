@@ -1,6 +1,7 @@
 package com.capt.ebankingbackend2022.service;
 
 import com.capt.ebankingbackend2022.dto.AccountDto;
+import com.capt.ebankingbackend2022.dto.DestinationUserDto;
 import com.capt.ebankingbackend2022.dto.UserDto;
 import com.capt.ebankingbackend2022.utils.Response;
 import org.springframework.data.domain.Page;
@@ -26,4 +27,6 @@ public interface AccountService {
 
 
     String getUserAvatar(Long id);
+
+    ResponseEntity<Response<DestinationUserDto>> getDestinationUser(String type, String value);
 }

@@ -1,6 +1,7 @@
 package com.capt.ebankingbackend2022.controller;
 
 import com.capt.ebankingbackend2022.dto.AccountDto;
+import com.capt.ebankingbackend2022.dto.DestinationUserDto;
 import com.capt.ebankingbackend2022.dto.UserDto;
 import com.capt.ebankingbackend2022.service.AccountService;
 import com.capt.ebankingbackend2022.service.DropboxService;
@@ -47,6 +48,12 @@ public class AccountController {
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response<AccountDto>> getUserByAccountId(@PathVariable Long id) {
         return accountService.getUserByAccountId(id);
+    }
+
+    @GetMapping("/findUser")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<DestinationUserDto>> getDestinationUser(@RequestParam("type") String type, @RequestParam("value") String value) {
+        return accountService.getDestinationUser(type, value);
     }
 
 
@@ -108,4 +115,6 @@ public class AccountController {
         double balanceNumber = Double.parseDouble(balance);
         return accountService.updateAccountBalance(id, balanceNumber);
     }
+
+
 }

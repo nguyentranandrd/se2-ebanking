@@ -1,6 +1,7 @@
 package com.capt.ebankingbackend2022.service.impl;
 
 import com.capt.ebankingbackend2022.dto.AccountDto;
+import com.capt.ebankingbackend2022.dto.DestinationUserDto;
 import com.capt.ebankingbackend2022.dto.UserDto;
 import com.capt.ebankingbackend2022.entity.AccountEntity;
 import com.capt.ebankingbackend2022.entity.UserEntity;
@@ -165,6 +166,19 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
         UserEntity user = userRepository.findById(id).orElse(null);
         if (user == null) return null;
         return user.getAvatar();
+    }
+
+    @Override
+    public ResponseEntity<Response<DestinationUserDto>> getDestinationUser(String type, String value) {
+        AccountEntity account = null;
+        if (type.equals("phone")) {
+            account = accountRepository.findByPhoneNumber(value);
+        } else if (type.equals("email"))
+            account = accountRepository.findByUser_Email(value);
+        if (account == null)
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "User not found"), HttpStatus.BAD_REQUEST);
+        DestinationUserDto user = modelMapper.map(account.getUser(), DestinationUserDto.class);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "Success", user), HttpStatus.OK);
     }
 
     private AccountEntity getLoggedAccount() {

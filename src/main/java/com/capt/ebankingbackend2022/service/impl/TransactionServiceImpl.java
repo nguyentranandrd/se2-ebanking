@@ -20,12 +20,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 @Service
 public class TransactionServiceImpl extends BaseServiceImpl implements TransactionService {
@@ -136,7 +135,7 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
     }
 
     @Override
-    public ResponseEntity<Response<TransactionDto>> createLoan(Long loggedUserId, CreateLoanDto createLoanDto) {
+    public ResponseEntity<Response<TransactionDto>> createLoan(long loggedUserId, CreateLoanDto createLoanDto) {
         if (createLoanDto.getAmount() <= 0) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "the loan amount must be greater than 0"), HttpStatus.BAD_REQUEST);
         }
@@ -181,13 +180,14 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
             saving.setStatus(TransactionStatus.COMPLETED);
             double profit = saving.getTransaction().getAmount() * (interest.getDuration() / (double) TimeUnit.DAYS.toMillis(365));
             if (!saving.isHasMaturity()) {
-                owner.setBalance(owner.getBalance() + saving.getTransaction().getAmount() + profit);
+                double moneyChanged = saving.getTransaction().getAmount() + profit;
+                createTransaction(owner, moneyChanged, TransactionType.RETURN_SAVING);
             } else {
                 double amount = saving.getTransaction().getAmount();
                 if (saving.isMaturityWithProfit()) {
                     amount += profit;
                 } else {
-                    owner.setBalance(owner.getBalance() + profit);
+                    createTransaction(owner, profit, TransactionType.RETURN_SAVING);
                 }
                 createSaving(owner.getId(), new CreateSavingDto(amount, saving.isHasMaturity(), saving.isMaturityWithProfit(), saving.getInterest().getId()));
             }
@@ -222,5 +222,47 @@ public class TransactionServiceImpl extends BaseServiceImpl implements Transacti
         else
             page = transactionRepository.getByOwnerIdAndTransactionType(userId, type, pageable).map(transactionEntity -> transactionMapper.toDto(transactionEntity));
         return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", page), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Response<TransactionDto>> withdrawSaving(long loggedUserId, long savingId) {
+        AccountEntity account = accountRepository.getById(loggedUserId);
+        SavingEntity savingEntity = savingRepository.findById(savingId).orElse(null);
+        if (savingEntity == null)
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Invalid saving id"), HttpStatus.BAD_REQUEST);
+        if (savingEntity.getTransaction().getOwner().getId() != account.getId())
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Not the saving owner"), HttpStatus.BAD_REQUEST);
+        if (savingEntity.getStatus().equals(TransactionStatus.COMPLETED)) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Saving has already been deposited"), HttpStatus.BAD_REQUEST);
+        }
+        savingEntity.setStatus(TransactionStatus.COMPLETED);
+        double interestMoney = savingEntity.getTransaction().getAmount() * savingEntity.getInterest().getInstantRate() * (float) (System.currentTimeMillis() - savingEntity.getStartTime().getTime()) / (float) TimeUnit.DAYS.toMillis(365);
+        double moneyChanged = interestMoney + savingEntity.getTransaction().getAmount();
+        savingRepository.save(savingEntity);
+        TransactionEntity transactionEntity = createTransaction(account, moneyChanged, TransactionType.WITHDRAW_SAVING);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transactionMapper.toDto(transactionEntity)), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Response<TransactionDto>> payLoan(long loggedUserId, long loanId) {
+        AccountEntity account = accountRepository.getById(loggedUserId);
+        LoanEntity loan = loanRepository.findById(loanId).orElse(null);
+        if (loan == null)
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Invalid loan id"), HttpStatus.BAD_REQUEST);
+        if (!Objects.equals(loan.getTransaction().getOwner().getId(), account.getId()))
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Not the loan owner"), HttpStatus.BAD_REQUEST);
+        if (loan.getStatus().equals(TransactionStatus.COMPLETED)) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Loan has already been returned"), HttpStatus.BAD_REQUEST);
+        }
+        double interestMoney = loan.getTransaction().getAmount() * loan.getInterest().getRate() * (System.currentTimeMillis() - loan.getStartTime().getTime()) / (float) TimeUnit.DAYS.toMillis(365);
+        double moneyChange = loan.getTransaction().getAmount() + interestMoney;
+        if (account.getBalance()< moneyChange){
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Account balance not enough to return loan"), HttpStatus.BAD_REQUEST);
+        }
+        loan.setStatus(TransactionStatus.COMPLETED);
+        loanRepository.save(loan);
+        TransactionEntity transaction = createTransaction(account, -moneyChange, TransactionType.RETURN_LOAN);
+        return new ResponseEntity<>(new Response<>(Response.STATUS_SUCCESS, "success", transactionMapper.toDto(transaction)), HttpStatus.OK);
+
     }
 }

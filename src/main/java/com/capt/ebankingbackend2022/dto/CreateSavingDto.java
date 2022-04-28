@@ -15,6 +15,4 @@ public class CreateSavingDto {
     private boolean maturityWithProfit;
 
     private Long interestId;
-
-
 }

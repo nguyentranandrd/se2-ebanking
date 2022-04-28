@@ -11,6 +11,8 @@ import java.util.Date;
 @Getter
 @Setter
 public class LoanDto {
+    private Long id;
+
     private Date startTime;
 
     private Date endTime;

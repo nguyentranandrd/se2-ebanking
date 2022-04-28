@@ -19,9 +19,13 @@ public interface TransactionService {
 
     ResponseEntity<Response<TransactionDto>> createSaving(long loggedUserId, CreateSavingDto createSavingDto);
 
-    ResponseEntity<Response<TransactionDto>> createLoan(Long loggedUserId, CreateLoanDto createLoanDto);
+    ResponseEntity<Response<TransactionDto>> createLoan(long loggedUserId, CreateLoanDto createLoanDto);
 
     void resolveEndTimeSavingAndLoan();
 
     ResponseEntity<Response<Page<TransactionDto>>> getPageableTransaction(long id, Pageable pageable, String type);
+
+    ResponseEntity<Response<TransactionDto>> withdrawSaving(long loggedUserId, long savingId);
+
+    ResponseEntity<Response<TransactionDto>> payLoan(long loggedUserId, long loanId);
 }
