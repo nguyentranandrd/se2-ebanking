@@ -131,6 +131,9 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
 
     @Override
     public ResponseEntity<Response<Boolean>> changePassword(String previousPass, String newPassword) {
+        if (!RegexValidationUtil.isValidPassword(newPassword)){
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "password is not strong enough.", false), HttpStatus.BAD_REQUEST);
+        }
         AccountEntity account = getLoggedAccount();
         if (!passwordEncoder.matches(previousPass, account.getPassword())) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "password is not true", false), HttpStatus.BAD_REQUEST);

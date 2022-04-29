@@ -90,6 +90,9 @@ public class AuthServiceImpl extends BaseServiceImpl implements AuthService {
         if (!RegexValidationUtil.is10NumberPhone(userDto.getPhoneNumber())) {
             return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "Invalid phone number (ex: 0123456789 or +840123456789)"), HttpStatus.BAD_REQUEST);
         }
+        if (!RegexValidationUtil.isValidPassword(userDto.getPassword())) {
+            return new ResponseEntity<>(new Response<>(Response.STATUS_FAILED, "password is not strong enough.", null), HttpStatus.BAD_REQUEST);
+        }
         if (roleString.equals(Authority.ADMIN)) {
             codeEntity.setActive(false);
             codeEntity.setUpdatedAt(new Date());
