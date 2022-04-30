@@ -33,6 +33,7 @@ public class AuthController {
 
 
     @GetMapping("/code")
+    @PreAuthorize("hasAuthority('admin')")
     public Response<CodeEntity> newAdminCode() {
         String code = UUID.randomUUID().toString();
         CodeEntity codeEntity = new CodeEntity();
