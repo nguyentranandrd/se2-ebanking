@@ -65,7 +65,6 @@ public class AccountServiceImpl extends BaseServiceImpl implements AccountServic
         userEntity.setFirstName(userDto.getFirstName());
         userEntity.setEmail(userDto.getEmail());
         userEntity.setLastName(userDto.getLastName());
-        userEntity.setAvatar(userDto.getAvatar());
         userEntity.setAddress(userDto.getAddress());
         account = accountRepository.save(account);
         AccountDto accountDto = accountMapper.toDto(account);
